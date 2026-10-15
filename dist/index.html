@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Track daily steps and discover how much of New York City you have explored." />
+  <title>NYC Step Map</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to content</a>
+  <header class="site-header">
+    <a class="brand" href="#home" data-route="home" aria-label="NYC Step Map home">
+      <span class="brand-mark" aria-hidden="true">NY</span>
+      <span>STEP MAP</span>
+    </a>
+    <button class="menu-button" id="menu-button" aria-label="Open menu" aria-expanded="false" aria-controls="main-nav">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="main-nav" id="main-nav" aria-label="Main navigation">
+      <a href="#home" data-route="home" aria-current="page">Home</a>
+      <a href="#goals" data-route="goals">Set a goal</a>
+      <a href="#history" data-route="history">Past records</a>
+      <a href="#progress" data-route="progress">Today's progress</a>
+    </nav>
+    <button class="avatar-button" id="profile-button" type="button" aria-label="Edit walking profile">ME</button>
+  </header>
+
+  <main id="main-content">
+    <section class="page active" id="home" aria-labelledby="home-title">
+      <div class="home-hero">
+        <div class="hero-copy">
+          <p class="eyebrow">YOUR CITY · YOUR PACE</p>
+          <h1 id="home-title">Good <span id="day-period">afternoon</span>,<br><em>New York.</em></h1>
+          <p class="lede">Every block counts. Keep moving to reach your step goal and uncover more of the city.</p>
+          <button class="location-chip" id="home-location" type="button" aria-label="Edit main activity area">⌖ Setting up your area…</button>
+          <div class="date-row">
+            <div><span class="meta-label">TODAY</span><strong id="today-date">Thursday, October 8</strong></div>
+            <div><span class="meta-label">LOCAL TIME</span><strong id="local-time">4:08 PM</strong></div>
+          </div>
+          <button class="primary-button" data-open-log>
+            <span aria-hidden="true">＋</span> Log steps
+          </button>
+        </div>
+
+        <div class="ring-stage" aria-label="Daily step progress">
+          <span class="orbit-label top">BRONX</span>
+          <span class="orbit-label right">QUEENS</span>
+          <span class="orbit-label bottom">BROOKLYN</span>
+          <svg class="progress-ring" viewBox="0 0 320 320" role="img" aria-labelledby="ring-title ring-desc">
+            <title id="ring-title">Daily goal progress</title>
+            <desc id="ring-desc">8,436 of 10,000 steps completed</desc>
+            <circle class="ring-track" cx="160" cy="160" r="126"></circle>
+            <circle class="ring-value" id="home-ring" cx="160" cy="160" r="126"></circle>
+          </svg>
+          <div class="ring-center">
+            <span class="tiny-label">TODAY'S STEPS</span>
+            <strong id="home-steps">8,436</strong>
+            <span id="home-goal-text">of 10,000</span>
+            <span class="status-pill" id="goal-status">ON TRACK</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="home-stats">
+        <article class="stat-card warm">
+          <span class="stat-icon" aria-hidden="true">↗</span>
+          <div><span class="meta-label">DISTANCE</span><strong id="distance">3.7 mi</strong></div>
+          <span class="trend">estimated from your height</span>
+        </article>
+        <article class="stat-card dark">
+          <span class="stat-icon" aria-hidden="true">⌖</span>
+          <div><span class="meta-label">AREAS COVERED</span><strong><span id="area-count">3</span> / 5</strong></div>
+          <span class="trend" id="home-area-name">NYC boroughs</span>
+        </article>
+        <article class="stat-card mint">
+          <span class="stat-icon" aria-hidden="true">✦</span>
+          <div><span class="meta-label">WEEKLY STREAK</span><strong id="streak">4 days</strong></div>
+          <span class="trend">Personal best: 8</span>
+        </article>
+      </div>
+    </section>
+
+    <section class="page" id="goals" aria-labelledby="goals-title" hidden>
+      <div class="page-heading">
+        <p class="eyebrow">MAKE IT YOURS</p>
+        <h1 id="goals-title">Set your <em>daily goal.</em></h1>
+        <p>Choose a target that feels motivating and realistic. You can change it anytime.</p>
+      </div>
+      <div class="two-column">
+        <form class="panel goal-form" id="goal-form" novalidate>
+          <label for="goal-input">Daily step target</label>
+          <div class="input-suffix"><input id="goal-input" name="goal" type="number" min="1000" max="50000" step="500" required /><span>steps</span></div>
+          <p class="field-hint">Choose between 1,000 and 50,000 steps.</p>
+          <p class="field-error" id="goal-error" role="alert"></p>
+          <fieldset>
+            <legend>Quick choices</legend>
+            <div class="choice-row">
+              <label><input type="radio" name="quick-goal" value="5000"><span>5,000<br><small>Starter</small></span></label>
+              <label><input type="radio" name="quick-goal" value="10000"><span>10,000<br><small>Everyday</small></span></label>
+              <label><input type="radio" name="quick-goal" value="15000"><span>15,000<br><small>Explorer</small></span></label>
+            </div>
+          </fieldset>
+          <label class="toggle-row"><span><strong>Goal reminders</strong><small>Get a reminder at 6 PM if you are behind.</small></span><input id="reminder-toggle" type="checkbox" role="switch" checked></label>
+          <button class="primary-button full" type="submit">Save my goal</button>
+        </form>
+        <aside class="goal-preview panel" aria-label="Goal preview">
+          <span class="meta-label">YOUR NEW TARGET</span>
+          <strong id="goal-preview-value">10,000</strong>
+          <span>steps per day</span>
+          <div class="mini-track"><span id="goal-preview-bar"></span></div>
+          <p>At your current pace, you’re <strong id="remaining-copy">1,564 steps</strong> away.</p>
+        </aside>
+      </div>
+    </section>
+
+    <section class="page" id="history" aria-labelledby="history-title" hidden>
+      <div class="page-heading inline-heading">
+        <div><p class="eyebrow">YOUR JOURNEY</p><h1 id="history-title">Past <em>records.</em></h1></div>
+        <label class="select-wrap">Show <select id="history-filter"><option value="all">All records</option><option value="goal">Goals reached</option><option value="missed">Goals missed</option></select></label>
+      </div>
+      <div class="history-summary" id="history-summary"></div>
+      <div class="panel record-panel">
+        <div class="record-header"><span>DATE</span><span>STEPS</span><span>AREAS</span><span>RESULT</span><span></span></div>
+        <div id="record-list"></div>
+        <div class="empty-state" id="history-empty" hidden>
+          <span aria-hidden="true">◌</span><h2>No matching walks</h2><p>Try a different filter or log today's first steps.</p><button class="secondary-button" data-open-log>Log steps</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="page" id="progress" aria-labelledby="progress-title" hidden>
+      <div class="page-heading inline-heading">
+        <div><p class="eyebrow">LIVE DASHBOARD</p><h1 id="progress-title">Today’s <em>progress.</em></h1></div>
+        <button class="primary-button" data-open-log>＋ Add steps</button>
+      </div>
+      <div class="progress-layout">
+        <article class="panel big-progress-card">
+          <div class="progress-top"><span class="meta-label">DAILY STEPS</span><span id="percent-label">84% COMPLETE</span></div>
+          <strong id="progress-steps">8,436</strong>
+          <span id="progress-goal">/ 10,000 steps</span>
+          <div class="wide-track"><span id="wide-progress"></span></div>
+          <p id="progress-message">Just 1,564 more steps — about 13 city blocks.</p>
+        </article>
+        <article class="panel borough-card map-card">
+          <div class="card-title"><div><span class="meta-label">NYC COVERAGE</span><h2>Boroughs explored</h2></div><strong id="borough-score">3/5</strong></div>
+          <div class="nyc-map" id="nyc-map" aria-label="Interactive street map of New York City"></div>
+          <p class="map-caption"><span class="map-key covered-key"></span> Covered today <span class="map-key home-key"></span> Main activity area</p>
+          <ul class="borough-list" id="borough-list"></ul>
+        </article>
+      </div>
+
+      <section class="time-section" aria-labelledby="time-title">
+        <div class="section-title"><div><span class="meta-label">WHEN YOU MOVED</span><h2 id="time-title">Steps across your day</h2></div><span class="live-badge">TODAY · NYC TIME</span></div>
+        <div class="time-grid">
+          <article class="panel chart-card">
+            <div class="hour-chart" id="hour-chart" role="img" aria-label="Bar chart of steps by time of day"></div>
+            <div class="chart-axis"><span>12 AM</span><span>6 AM</span><span>12 PM</span><span>6 PM</span><span>NOW</span></div>
+          </article>
+          <div class="period-list" id="period-list"></div>
+        </div>
+      </section>
+
+      <section class="impact-section" aria-labelledby="impact-title">
+        <div class="section-title impact-title-row"><div><span class="meta-label">YOUR WALKING IMPACT</span><h2 id="impact-title">Your day, translated.</h2></div><p>Personalized estimates using your height, weight and today’s steps.</p></div>
+        <div class="impact-topline">
+          <article class="impact-hero calories"><span class="impact-icon">≈</span><span>CALORIES BURNED</span><strong id="calories-value">—</strong><small>active kcal estimate</small></article>
+          <article class="impact-hero carbon"><span class="impact-icon">↓</span><span>CO₂ AVOIDED VS. CAR</span><strong id="carbon-value">—</strong><small>lb of tailpipe CO₂</small></article>
+          <article class="impact-hero distance"><span class="impact-icon">↗</span><span>WALKING DISTANCE</span><strong id="impact-distance">—</strong><small>miles estimated</small></article>
+        </div>
+        <article class="panel comparison-card">
+          <div class="comparison-head"><div><span class="meta-label">IF YOU HADN'T WALKED</span><h3>What today’s distance might have cost</h3></div><span>Estimated savings</span></div>
+          <div class="comparison-table" id="comparison-table"></div>
+          <details class="estimate-note"><summary>How these estimates work</summary><p id="estimate-method"></p><p>These are educational estimates, not medical, financial or emissions measurements. Pace, terrain, traffic, vehicle type and fare rules can change the results.</p><p class="source-links">Sources: <a href="https://www.mta.info/document/186881" target="_blank" rel="noreferrer">MTA fares</a> · <a href="https://www.nyc.gov/site/tlc/passengers/taxi-fare.page" target="_blank" rel="noreferrer">NYC TLC fares</a> · <a href="https://www.epa.gov/greenvehicles/greenhouse-gas-emissions-typical-passenger-vehicle" target="_blank" rel="noreferrer">EPA vehicle emissions</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC9635924/" target="_blank" rel="noreferrer">Walking energy study</a></p></details>
+        </article>
+      </section>
+    </section>
+  </main>
+
+  <footer><span>NYC STEP MAP · GROUP 2</span><span>Made for walkers across the five boroughs.</span></footer>
+
+  <dialog id="profile-dialog" class="profile-dialog" aria-labelledby="profile-title">
+    <form class="dialog-shell profile-shell" id="profile-form" novalidate>
+      <button class="close-button" id="close-profile" type="button" aria-label="Close profile settings">×</button>
+      <div class="profile-intro"><span class="profile-step">WELCOME TO NYC STEP MAP</span><h2 id="profile-title">First, tell us<br><em>where you move.</em></h2><p>This helps tailor your city coverage, distance and activity estimates. You can change it later.</p></div>
+      <div class="profile-fields">
+        <label for="borough-select">Main activity borough</label>
+        <select id="borough-select" required>
+          <option value="">Choose a borough</option><option>Manhattan</option><option>Brooklyn</option><option>Queens</option><option>Bronx</option><option>Staten Island</option>
+        </select>
+        <label for="neighborhood-select">Neighborhood</label>
+        <select id="neighborhood-select" required disabled><option value="">Choose a borough first</option></select>
+        <div class="measurement-row">
+          <label>Height <span><input id="height-input" type="number" min="120" max="230" placeholder="170" required><b>cm</b></span></label>
+          <label>Weight <span><input id="weight-input" type="number" min="30" max="250" placeholder="65" required><b>kg</b></span></label>
+        </div>
+        <p class="field-error" id="profile-error" role="alert"></p>
+        <label class="privacy-note"><span aria-hidden="true">◉</span><span><strong>Stored on this device</strong><small>Your profile stays in this browser and can be edited anytime.</small></span></label>
+        <button class="primary-button full" type="submit">Save & explore NYC</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="log-dialog" aria-labelledby="log-title">
+    <form method="dialog" class="dialog-shell" id="log-form" novalidate>
+      <button class="close-button" type="button" data-close-log aria-label="Close dialog">×</button>
+      <p class="eyebrow">ADD TODAY'S WALK</p>
+      <h2 id="log-title">Log your steps</h2>
+      <label for="steps-input">Steps to add</label>
+      <input id="steps-input" name="steps" type="number" min="1" max="100000" placeholder="e.g. 2,500" required />
+      <p class="field-error" id="steps-error" role="alert"></p>
+      <label for="time-input">Time of walk</label>
+      <input id="time-input" name="time" type="time" required />
+      <fieldset>
+        <legend>Areas covered on this walk</legend>
+        <div class="check-grid" id="borough-options">
+          <label><input type="checkbox" value="Manhattan"><span>Manhattan</span></label>
+          <label><input type="checkbox" value="Brooklyn"><span>Brooklyn</span></label>
+          <label><input type="checkbox" value="Queens"><span>Queens</span></label>
+          <label><input type="checkbox" value="Bronx"><span>Bronx</span></label>
+          <label><input type="checkbox" value="Staten Island"><span>Staten Island</span></label>
+        </div>
+      </fieldset>
+      <div class="dialog-actions"><button class="secondary-button" type="button" data-close-log>Cancel</button><button class="primary-button" type="submit">Add to today</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="confirm-dialog" aria-labelledby="confirm-title">
+    <div class="dialog-shell confirm-shell">
+      <span class="confirm-icon" aria-hidden="true">!</span><h2 id="confirm-title">Delete this record?</h2><p>This action cannot be undone.</p>
+      <div class="dialog-actions"><button class="secondary-button" id="cancel-delete">Keep it</button><button class="danger-button" id="confirm-delete">Delete record</button></div>
+    </div>
+  </dialog>
+  <div class="toast" id="toast" role="status" aria-live="polite"><span aria-hidden="true">✓</span><span id="toast-copy">Saved</span></div>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  <script src="app.js"></script>
+</body>
+</html>
