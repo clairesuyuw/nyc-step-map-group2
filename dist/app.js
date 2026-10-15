@@ -18,9 +18,8 @@ const BASE_EVENTS = [
 const todayKey = () => new Date().toISOString().slice(0, 10);
 const relativeDate = daysAgo => { const d = new Date(); d.setDate(d.getDate() - daysAgo); return d.toISOString().slice(0, 10); };
 const defaults = {
-  version: 2,
+  version: 3,
   goal: 10000,
-  reminders: true,
   profile: null,
   today: { steps: 8436, areas: ['Manhattan', 'Brooklyn', 'Queens'], events: BASE_EVENTS },
   records: [
@@ -37,13 +36,13 @@ let state;
 try { state = JSON.parse(localStorage.getItem('nyc-step-map')) || clone(defaults); }
 catch { state = clone(defaults); }
 state.goal ||= defaults.goal;
-state.reminders ??= defaults.reminders;
 state.profile ??= null;
 state.today ||= clone(defaults.today);
 state.today.areas ||= [];
 state.records ||= clone(defaults.records);
 if (!state.today.events?.length) state.today.events = scaleEvents(state.today.steps || 0);
-state.version = 2;
+delete state.reminders;
+state.version = 3;
 
 const $ = selector => document.querySelector(selector);
 const $$ = selector => [...document.querySelectorAll(selector)];
@@ -101,7 +100,6 @@ function render() {
   $('#home-location').textContent = `⌖ ${areaLabel}`;
   $('#home-area-name').textContent = state.profile ? `home: ${state.profile.borough}` : 'NYC boroughs';
   $('#goal-input').value = state.goal;
-  $('#reminder-toggle').checked = state.reminders;
   $('#goal-preview-value').textContent = formatNumber(state.goal);
   $('#goal-preview-bar').style.width = `${percent}%`;
   $('#remaining-copy').textContent = reached ? `${formatNumber(state.today.steps - state.goal)} steps beyond your goal` : `${formatNumber(remaining)} steps`;
@@ -288,7 +286,6 @@ $('#goal-form').addEventListener('submit', event => {
   if (!Number.isFinite(goal) || goal < 1000 || goal > 50000) { $('#goal-error').textContent = 'Your goal must be between 1,000 and 50,000 steps.'; $('#goal-input').focus(); return; }
   $('#goal-error').textContent = '';
   state.goal = Math.round(goal / 100) * 100;
-  state.reminders = $('#reminder-toggle').checked;
   save(); render(); toast(`Daily goal set to ${formatNumber(state.goal)} steps`);
 });
 
@@ -300,6 +297,7 @@ $('#confirm-delete').addEventListener('click', () => { state.records = state.rec
 
 updateClock();
 setInterval(updateClock, 30000);
+save();
 render();
 showRoute(location.hash.slice(1));
 if (!state.profile) setTimeout(() => openProfile('onboarding'), 250);
